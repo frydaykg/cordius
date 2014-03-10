@@ -1,0 +1,15 @@
+.box {
+	width: 300px;
+}
+.textbox {
+	width: 65%;
+}			
+.box label {
+	display: inline-block;
+	width: 30%;
+}			
+.button {
+	width: 70%;
+	margin-right: 15%;
+	margin-left: 15%;
+}
