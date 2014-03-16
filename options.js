@@ -1,12 +1,20 @@
 function save() {
-	localStorage["publicKey"] = document.getElementById("publicKey").value;;
-	localStorage["privateKey"] = document.getElementById("privateKey").value;
+	chrome.storage.local.set(
+	{
+		"publicKey" : document.getElementById("publicKey").value,
+		"privateKey" : document.getElementById("privateKey").value
+	});
 }
 
-function load() {
-
+function setFields(data) {
+	document.getElementById("publicKey").value = data.publicKey;
+	document.getElementById("privateKey").value = data.privateKey;
 }
 
-	chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
-  console.log(response.farewell);
-});
+function init()
+{
+	document.getElementById("saveButton").addEventListener("click", save);
+	chrome.storage.local.get(["publicKey", "privateKey"], setFields);
+}
+
+document.addEventListener("DOMContentLoaded", init);

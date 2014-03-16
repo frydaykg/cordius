@@ -4,7 +4,7 @@
 		<script type="text/javascript" src="options.js"></script>
 		<link href="options.css" rel="stylesheet" type="text/css"/>
 	</head>
-	<body onload="load()">
+	<body>
 		<div class="box">
 			<label>Public key:</label>
 			<input class="textbox" type="text" id="publicKey"></input>
@@ -12,7 +12,7 @@
 			<label>Private key:</label>
 			<input class="textbox" type="text" id="privateKey"></input>
 			<br>
-			<input class="button" type="submit" value="Save" onclick="save()">
+			<input id="saveButton" class="button" type="submit" value="Save">
 		</div>
 	</body>
 </html>

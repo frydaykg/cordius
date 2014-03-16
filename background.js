@@ -1,44 +1,112 @@
-function apiQuery()
+var keyObtained = false;
+var privateKey = '';
+var publicKey = '';
+
+function saveOrders(orders)
 {
+	chrome.storage.local.set(
+	{
+		"orders" : orders
+	});
+}
+
+function getMessage(diff)
+{
+	var res = '';
+	
+	for (var i = 0; i < diff.length; i++)
+	{
+		var order = diff[i];
+		res += order.ordertype + " order " + order.price + " * " + Math.ceil(order.quantity) + " was closed\\canceled";
+	}
+	
+	return res;
+}
+
+function handleChanges(currentOrders)
+{
+	chrome.storage.local.get("orders", function (data)
+	{
+		if (data.orders)
+		{
+			var diff = [];
+			for (var i = 0; i < data.orders.length; i++)
+			{
+				var was = false;
+				for (var j = 0; j < currentOrders.length; j++)
+				{
+					if (data.orders[i].orderid == currentOrders[j].orderid)
+					{
+						was = true;
+						break;
+					}
+				}
+				
+				if (!was)
+				{
+					diff.push(data.orders[i]);
+				}
+			}
+			if (diff.length > 0)
+				showNotification(getMessage(diff));
+			saveOrders(currentOrders);
+		}
+	});
+	
+}
+
+function getKeys(){
+	keyObtained = false;
+	chrome.storage.local.get(["publicKey", "privateKey"], function(data){
+		publicKey = data.publicKey;
+		privateKey = data.privateKey;
+		keyObtained = true;
+		});
+}
+
+function apiQuery(){
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open( "POST", 'https://api.cryptsy.com/api', false );
 	var postData = "method=allmyorders&nonce=" + new Date().getTime()
-	xmlHttp.setRequestHeader("Sign", CryptoJS.HmacSHA512(postData, "ec794ce9265be51d4b4d084a0f9fd16decd34c4dbf1d4bbc4358019a0a2758e2db43b898a4e33d42"))
-	xmlHttp.setRequestHeader("Key", "a7c0f75dddd9b2b14e0818770099bb5789bbb9a7")
+	xmlHttp.setRequestHeader("Sign", CryptoJS.HmacSHA512(postData, privateKey))
+	xmlHttp.setRequestHeader("Key", publicKey)
 	xmlHttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	xmlHttp.send( postData );
+	xmlHttp.send(postData);
 	return xmlHttp.responseText;
 }
 
+function showNotification(message)
+{
+	var notification = webkitNotifications.createNotification(
+							  'icon.png',  // icon url - can be relative
+							  'Changes in open orders',  // notification title
+							   message  // notification body text
+							);
+	notification.show();
+}
 
 function main(){
-	var data = apiQuery();
-	var result = JSON.parse(data);
-	var notification = webkitNotifications.createNotification(
-						  'icon.png',  // icon url - can be relative
-						  'Hello!',  // notification title
-						   window.localStorage["publicKey"]  // notification body text
-						);
-
-notification.show();
+	if (keyObtained)
+	{
+		var data = apiQuery();
+		var result = JSON.parse(data);
+		if (result.success)
+			handleChanges(result.return);
+	}
 setTimeout(main, 3000);
 }
 
-chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    console.log(sender.tab ?
-                "from a content script:" + sender.tab.url :
-                "from the extension");
-    if (request.greeting == "hello")
-      {
-		  var notification = webkitNotifications.createNotification(
-						  'icon.png',  // icon url - can be relative
-						  'Hello!',  // notification title
-						   12345678765433456789  // notification body text
-						);
+function onStorageChanges(changes, areaName)
+{
+	if (areaName === "local")
+	{
+		if ("publicKey" in changes || "privateKey" in changes)
+		{
+			getKeys();
+		}
+	}
+}
 
-notification.show();
-		  }
-  });
-
-main()
+chrome.storage.onChanged.addListener(onStorageChanges);
+getKeys();
+main();
