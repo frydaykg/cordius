@@ -1,19 +1,19 @@
 function save() {
 	chrome.storage.local.set(
 	{
-		"publicKey" : document.getElementById("publicKey").value,
-		"privateKey" : document.getElementById("privateKey").value
+		"publicKey" : $("#publicKey").val(),
+		"privateKey" : $("#privateKey").val()
 	});
 }
 
 function setFields(data) {
-	document.getElementById("publicKey").value = data.publicKey;
-	document.getElementById("privateKey").value = data.privateKey;
+	$("#publicKey").val(data.publicKey);
+	$("#privateKey").val(data.privateKey);
 }
 
 function init()
 {
-	document.getElementById("saveButton").addEventListener("click", save);
+	$("#saveButton").click(save);
 	chrome.storage.local.get(["publicKey", "privateKey"], setFields);
 }
 
