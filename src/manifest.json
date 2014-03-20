@@ -5,6 +5,13 @@
 	"version": "1.0",
 	"options_page": "options/options.html",
 	
+	"icons": 
+	{
+		"16": "icon.png",
+           	"48": "icon.png",
+          	"128": "icon.png" 
+	},
+	
 	"background": 
 	{
 		"page": "background/background.html"

@@ -78,7 +78,7 @@ function apiQuery(){
 function showNotification(message)
 {
 	var notification = webkitNotifications.createNotification(
-							  'icon.png',  // icon url - can be relative
+							  '../icon.png',  // icon url - can be relative
 							  'Changes in open orders',  // notification title
 							   message  // notification body text
 							);
