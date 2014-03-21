@@ -22,11 +22,5 @@
 		"storage",
 		"notifications",
 		"https://api.cryptsy.com/api"
-	],
-	
-	"browser_action": 
-	{
-		"default_icon": "icon.png",
-		"default_popup": "options/options.html"
-	}
+	]
 }
