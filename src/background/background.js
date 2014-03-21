@@ -59,17 +59,22 @@ function getKeys(){
 function apiQuery(methodName){
 	nonce = new Date().getTime()
 	var postData = "method=" + methodName +"&nonce=" + nonce
-		
-	return $.ajax({
-			url: "https://api.cryptsy.com/api",
-			async: false,
-			type: "POST",
-			data: postData,
-			headers: {
-				Sign: CryptoJS.HmacSHA512(postData, privateKey),
-				Key: publicKey
-			}
-		}).responseText;
+	
+	try	{		
+		return $.ajax({
+				url: "https://api.cryptsy.com/api",
+				async: false,
+				type: "POST",
+				data: postData,
+				headers: {
+					Sign: CryptoJS.HmacSHA512(postData, privateKey),
+					Key: publicKey
+				}
+			}).responseText;
+	}
+	catch(error){
+		console.log(error);
+	}
 }
 
 function showNotification(message)
@@ -85,10 +90,15 @@ function showNotification(message)
 function main(){
 	if (keyObtained)
 	{
-		var data = apiQuery("allmyorders");
-		var result = JSON.parse(data);
-		if (result.success)
-			handleChanges(result.return);
+		try	{
+			var data = apiQuery("allmyorders");
+			var result = JSON.parse(data);
+			if (result.success)
+				handleChanges(result.return);
+		}
+		catch(error){
+			console.log(error);
+		}
 	}
 setTimeout(main, 3000);
 }
