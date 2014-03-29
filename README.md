@@ -1,4 +1,4 @@
 cordius
 =======
 
-Chrome extension for notification about closed orders.
+Chrome extension for notification about closed orders on Cryptsy.
