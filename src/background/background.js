@@ -1,6 +1,8 @@
 var keyObtained = false;
 var privateKey = '';
 var publicKey = '';
+var markets = {}
+var notificationSymbolWidth = 70;
 
 function saveOrders(orders)
 {
@@ -12,7 +14,26 @@ function saveOrders(orders)
 
 function getMessage(order)
 {
-	return order.ordertype + " order " + order.price + " * " + Math.ceil(order.quantity) + " was closed\\canceled";
+	var marketName = 'unknown';	
+	$.each(markets, function(j, market) {
+					if (market.marketid == order.marketid)
+					{
+						marketName = market.label;
+						return false;
+					}
+				});
+				
+	return justifyRight("Market: " + marketName, notificationSymbolWidth) +
+		   justifyRight("OrderType: " + order.ordertype, notificationSymbolWidth) +
+		   justifyRight("Price: " + order.price, notificationSymbolWidth) +
+		   justifyRight("Quantity: " + Math.ceil(order.quantity), notificationSymbolWidth);
+}
+
+function justifyRight(s, w){
+	while (s.length < w){
+		s = s + " ";
+	}
+	return s;
 }
 
 function handleChanges(currentOrders)
@@ -47,12 +68,13 @@ function handleChanges(currentOrders)
 	
 }
 
-function getKeys(){
+function getKeys(callback){
 	keyObtained = false;
 	chrome.storage.local.get(["publicKey", "privateKey"], function(data){
 		publicKey = data.publicKey;
 		privateKey = data.privateKey;
 		keyObtained = true;
+		callback();
 		});
 }
 
@@ -103,6 +125,12 @@ function main(){
 setTimeout(main, 3000);
 }
 
+function getmarketsInfo()
+{
+	var data = apiQuery("getmarkets");
+	markets = JSON.parse(data).return;
+}
+
 function onStorageChanges(changes, areaName)
 {
 	if (areaName === "local")
@@ -114,6 +142,11 @@ function onStorageChanges(changes, areaName)
 	}
 }
 
-chrome.storage.onChanged.addListener(onStorageChanges);
-getKeys();
-main();
+try	{
+	chrome.storage.onChanged.addListener(onStorageChanges);
+	getKeys(getmarketsInfo);
+	main();
+}
+catch(error){
+	console.log(error);
+}
